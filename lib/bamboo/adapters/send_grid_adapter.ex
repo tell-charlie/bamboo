@@ -119,18 +119,27 @@ defmodule Bamboo.SendGridAdapter do
   end
 
   defp put_cc(body, %Email{cc: []}), do: body
+
   defp put_cc(body, %Email{cc: cc}) do
     put_addresses(body, :cc, cc)
   end
 
   defp put_bcc(body, %Email{bcc: []}), do: body
+
   defp put_bcc(body, %Email{bcc: bcc}) do
     put_addresses(body, :bcc, bcc)
   end
 
-  defp put_reply_to(body, %Email{headers: %{"reply-to" => reply_to}}) do
+  defp put_reply_to(body, %Email{headers: %{"reply-to" => reply_to}})
+       when is_binary(reply_to) do
     Map.put(body, :reply_to, %{email: reply_to})
   end
+
+  defp put_reply_to(body, %Email{headers: %{"reply-to" => reply_to}})
+       when is_tuple(reply_to) do
+    put_addresses(body, :reply_to, [reply_to])
+  end
+
   defp put_reply_to(body, _), do: body
 
   defp put_subject(body, %Email{subject: subject}), do: Map.put(body, :subject, subject)
